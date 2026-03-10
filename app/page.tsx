@@ -46,7 +46,7 @@ export default function Home() {
     >
       {/* Napisy */}
       <div className="w-[500px] flex flex-col items-center justify-center mb-8 text-center">
-        <h1 className="text-[180px] leading-none font-sans">Quotify</h1>
+        <h1 className="text-8xl sm:text-7xl md:text-8xl lg:text-[180px] leading-none font-sans">Quotify</h1>
         <p className="text-center max-w-md">
           Każdy dzień niesie ze sobą nowe myśli i inspiracje. Kliknij przycisk i pozwól losowi wybrać cytat, który dziś rozświetli Twój umysł.
         </p>
@@ -88,7 +88,6 @@ export default function Home() {
             <FontAwesomeIcon icon={faTimes} />
           </div>
 
-          {/* Wyśrodkowana treść */}
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
             <p className="text-4xl font-semibold text-gray-900 mb-4">
               {quote.content}

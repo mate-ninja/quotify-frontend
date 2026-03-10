@@ -25,10 +25,10 @@ import { json } from "stream/consumers";
 
 // Typy
 type Quote = {
-  id: string;         // zakładam, że API zwraca id (np. GUID lub liczba)
+  id: string;         
   cytat: string;
   autor: string;
-  czasUtworzenia: string; // ISO string
+  czasUtworzenia: string; 
 };
 
 type LoginData = {
@@ -80,7 +80,7 @@ export default function AdminPage() {
     }
   }
 
-  // Sprawdź token przy starcie
+  // Sprawdzanie tokenu
   useEffect(() => {
     const token = localStorage.getItem("token")||"";
     const email = localStorage.getItem("email");
@@ -89,7 +89,7 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Pobierz listę cytatów po zalogowaniu
+  // Pobieranie listy cytatów
   useEffect(() => {
     if (user) {
       fetchQuotes();
@@ -113,7 +113,7 @@ export default function AdminPage() {
       if (!response.ok) throw new Error("Błąd pobierania cytatów");
       const data = await response.json();
       
-      // Sortowanie po ID (zakładając, że ID są liczbami lub można je skonwertować na liczby)
+
       data.sort((a: Quote, b: Quote) => Number(a.id) - Number(b.id));
       
       setQuotes(data);
@@ -199,7 +199,6 @@ export default function AdminPage() {
         return;
       }
       if (!response.ok) throw new Error("Błąd usuwania cytatu");
-      // Odśwież listę
       fetchQuotes();
     } catch (error: any) {
       alert(error.message);
@@ -220,7 +219,6 @@ export default function AdminPage() {
       return;
     }
 
-    // Przy edycji również wysyłamy nowy czas – aktualizacja daty modyfikacji
     const payload = {
       ...formData,
       czasUtworzenia: new Date().toISOString(),
@@ -254,7 +252,6 @@ export default function AdminPage() {
         message: editingQuote ? "Cytat zaktualizowany pomyślnie!" : "Cytat dodany pomyślnie!",
       });
 
-      // Po chwili zamknij modal i odśwież listę
       setTimeout(() => {
         closeModal();
         fetchQuotes();
@@ -317,7 +314,7 @@ export default function AdminPage() {
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Nazwa użytkownika / Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="text"
