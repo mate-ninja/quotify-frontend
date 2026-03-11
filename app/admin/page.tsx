@@ -20,6 +20,7 @@ import {
   faTrashAlt,
   faSyncAlt,
   faTimes,
+  faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
 
@@ -59,6 +60,7 @@ export default function AdminPage() {
   // Modal dodawania/edycji
   const [showModal, setShowModal] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+  const [AIQuote, setAIQuote] = useState(false);
   const [formData, setFormData] = useState<{ cytat: string; autor: string }>({
     cytat: "",
     autor: "",
@@ -166,6 +168,7 @@ export default function AdminPage() {
 
   const openAddModal = () => {
     setEditingQuote(null);
+    setAIQuote(false);
     setFormData({ cytat: "", autor: "" });
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
@@ -173,7 +176,16 @@ export default function AdminPage() {
 
   const openEditModal = (quote: Quote) => {
     setEditingQuote(quote);
+    setAIQuote(false);
     setFormData({ cytat: quote.cytat, autor: quote.autor });
+    setFormStatus({ type: null, message: "" });
+    setShowModal(true);
+  };
+
+  const openAIModal = () => {
+    setEditingQuote(null);
+    setAIQuote(true);
+    setFormData({ cytat: "", autor: "" });
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -210,24 +222,28 @@ export default function AdminPage() {
     setFormStatus({ type: null, message: "" });
     setFormLoading(true);
 
-    if (!formData.cytat.trim() || !formData.autor.trim()) {
+    if (!formData.cytat.trim() || (!formData.autor.trim() && !AIQuote)) {
       setFormStatus({
         type: "error",
-        message: "Treść cytatu i autor są wymagane",
+        message: AIQuote ? "Temat zapytania jest wymagana" : "Treść cytatu i autor są wymagane",
       });
       setFormLoading(false);
       return;
     }
 
-    const payload = {
+    const payload = AIQuote ? {
+      AIprompt: formData.cytat,
+      czasUtworzenia: new Date().toISOString()
+    }
+    : {
       ...formData,
-      czasUtworzenia: new Date().toISOString(),
+      czasUtworzenia: new Date().toISOString()
     };
 
     try {
       const url = editingQuote
         ? `https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/${editingQuote.id}`
-        : "https://cetuspro-quotify02-03.azurewebsites.net/api/Quote";
+        : ( AIQuote ? "https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/generate-ai" : "https://cetuspro-quotify02-03.azurewebsites.net/api/Quote");
       const method = editingQuote ? "PATCH" : "POST";
 
       const response = await fetch(url, {
@@ -244,12 +260,12 @@ export default function AdminPage() {
         closeModal();
         return;
       }
-
       if (!response.ok) throw new Error(editingQuote ? "Błąd edycji cytatu" : "Błąd dodawania cytatu");
+      let result = await response.json()
 
       setFormStatus({
         type: "success",
-        message: editingQuote ? "Cytat zaktualizowany pomyślnie!" : "Cytat dodany pomyślnie!",
+        message: editingQuote ? "Cytat zaktualizowany pomyślnie!" : `Cytat dodany pomyślnie! Id cytatu: ${result.id}`,
       });
 
       setTimeout(() => {
@@ -392,6 +408,13 @@ export default function AdminPage() {
                   <FontAwesomeIcon icon={faPlus} className="mr-2 h-4 w-4" />
                   Dodaj
                 </Button>
+                <Button
+                  onClick={openAIModal}
+                  className="bg-gradient-to-r from-amber-300 to-amber-500 hover:from-amber-400 hover:to-amber-600 text-white"
+                >
+                  <FontAwesomeIcon icon={faUpload} className="mr-2 h-4 w-4" />
+                  Dodaj za pomocą AI
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -462,7 +485,8 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Modal dodawania/edycji */}
+      {/* Modal dodawania/edycji 
+      mate_ninja edit: AI handling*/}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl relative shadow-2xl">
@@ -479,31 +503,31 @@ export default function AdminPage() {
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="modal-content">
-                    Treść cytatu <span className="text-red-500">*</span>
+                    {AIQuote ? "Temat cytatu" : "Treść cytatu"} <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="modal-content"
-                    placeholder="Wpisz treść cytatu..."
+                    placeholder= {AIQuote ? "Wpisz temat zapytania..." : "Wpisz treść cytatu..."}
                     value={formData.cytat}
                     onChange={(e) => setFormData({ ...formData, cytat: e.target.value })}
                     className="min-h-[120px]"
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="modal-author">
-                    Autor <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="modal-author"
-                    placeholder="Wpisz autora cytatu..."
-                    value={formData.autor}
-                    onChange={(e) => setFormData({ ...formData, autor: e.target.value })}
-                    required
-                  />
-                </div>
-
+                { !AIQuote && (
+                  <div className="space-y-2">
+                    <Label htmlFor="modal-author">
+                      Autor <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="modal-author"
+                      placeholder="Wpisz autora cytatu..."
+                      value={formData.autor}
+                      onChange={(e) => setFormData({ ...formData, autor: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
                 {formStatus.type && (
                   <div
                     className={`p-4 rounded-lg flex items-center gap-2 ${
@@ -532,7 +556,7 @@ export default function AdminPage() {
                     {formLoading ? (
                       <>
                         <FontAwesomeIcon icon={faSpinner} spin className="mr-2 h-4 w-4" />
-                        Zapisywanie...
+                        {AIQuote ? "Generowanie..." : "Zapisywanie..."}
                       </>
                     ) : editingQuote ? (
                       "Zapisz zmiany"
