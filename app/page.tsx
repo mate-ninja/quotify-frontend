@@ -6,12 +6,53 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import "./globals.css";
 
+type Quote = {
+  content: string;
+  author: string;
+};
+
+type CustomizeSettings = {
+  background: string; 
+  quoteColor: string;
+  quoteFont: string;
+  quoteSize: number;
+};
+
 export default function Home() {
-  const [quote, setQuote] = useState<{ content: string; author: string }>({ content: "", author: "" });
+  const [quote, setQuote] = useState<Quote>({ content: "", author: "" });
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [customizeOpen, setCustomizeOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const customizeRef = useRef<HTMLDivElement>(null);
+
+  // Domyślne ustawienia
+  const defaultSettings: CustomizeSettings = {
+    background: "url('/images/photo.png')",
+    quoteColor: "#111827", // text-gray-900
+    quoteFont: "Arial, sans-serif",
+    quoteSize: 2.25, // text-4xl to 2.25rem
+  };
+
+  const [settings, setSettings] = useState<CustomizeSettings>(defaultSettings);
+
+  // Wczytaj z localstorage
+  useEffect(() => {
+    const saved = localStorage.getItem("customizeSettings");
+    if (saved) {
+      try {
+        setSettings(JSON.parse(saved));
+      } catch (e) {
+        console.error("Błąd odczytu ustawień", e);
+      }
+    }
+  }, []);
+
+  // zapisywanie w localstorage
+  useEffect(() => {
+    localStorage.setItem("customizeSettings", JSON.stringify(settings));
+  }, [settings]);
 
   async function getJSONData(): Promise<[string, string]> {
     const response = await fetch(
@@ -41,23 +82,149 @@ export default function Home() {
 
   const closePopup = (): void => setShowPopup(false);
 
-  // Zamknij menu po kliknięciu poza nim
+  // Zamknięcie pop-up po kliknięciu poza
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
+      }
+      if (customizeRef.current && !customizeRef.current.contains(event.target as Node)) {
+        setCustomizeOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleCustomizeClick = () => {
+    setMenuOpen(false);
+    setCustomizeOpen(true);
+  };
+
+  const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setSettings({ ...settings, background: `url('${url}')` });
+    }
+  };
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings({ ...settings, quoteColor: e.target.value });
+  };
+
+  const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSettings({ ...settings, quoteFont: e.target.value });
+  };
+
+  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings({ ...settings, quoteSize: parseFloat(e.target.value) });
+  };
+
+  const resetSettings = () => {
+    setSettings(defaultSettings);
+  };
+
   return (
     <div
-      className="w-screen h-screen flex flex-col items-center justify-center bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/images/photo.png')" }}
+      className="w-screen h-screen flex flex-col items-center justify-center bg-cover bg-center relative transition-all duration-300"
+      style={{ backgroundImage: settings.background }}
     >
-      {/* Napisy - responsywne */}
+      {/* Panel Customize */}
+      {customizeOpen && (
+        <div
+          ref={customizeRef}
+          className="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-white rounded-xl shadow-2xl z-30 p-5 border border-gray-200"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Dostosuj wygląd</h3>
+            <button
+              onClick={() => setCustomizeOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Tło */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tło strony
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleBackgroundChange}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+              />
+              <button
+                onClick={() => setSettings({ ...settings, background: defaultSettings.background })}
+                className="mt-2 text-xs text-emerald-600 hover:text-emerald-800"
+              >
+                Przywróć domyślne tło
+              </button>
+            </div>
+
+            {/* Kolor cytatu */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Kolor tekstu cytatu
+              </label>
+              <input
+                type="color"
+                value={settings.quoteColor}
+                onChange={handleColorChange}
+                className="w-full h-10 p-1 rounded border border-gray-300"
+              />
+            </div>
+
+            {/* Czcionka */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Czcionka cytatu
+              </label>
+              <select
+                value={settings.quoteFont}
+                onChange={handleFontChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="'Segoe UI', sans-serif">Segoe UI</option>
+              </select>
+            </div>
+
+            {/* Rozmiar */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rozmiar cytatu: {settings.quoteSize}rem
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="4"
+                step="0.125"
+                value={settings.quoteSize}
+                onChange={handleSizeChange}
+                className="w-full"
+              />
+            </div>
+
+            <button
+              onClick={resetSettings}
+              className="w-full mt-2 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-colors text-sm"
+            >
+              Przywróć domyślne
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Napisy */}
       <div className="w-full sm:w-[500px] flex flex-col items-center justify-center mb-4 sm:mb-8 text-center px-4 sm:px-0">
         <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[180px] leading-none font-sans">
           Quotify
@@ -67,7 +234,7 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Przyciski - pionowo na małych ekranach */}
+      {/* Przyciski */}
       <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto px-4 sm:px-0">
         <button
           onClick={handleRandomQuote}
@@ -76,16 +243,15 @@ export default function Home() {
           Losuj cytat
         </button>
 
-        {/* Dropdown z trzema kropkami */}
+        {/* Dropdown */}
         <div className="relative w-full sm:w-auto" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-full sm:w-auto bg-gradient-to-l from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white px-4 py-3 rounded-2xl text-xl sm:text-2xl font-bold shadow-xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl active:translate-y-0 active:shadow-lg flex items-center justify-center"
+            className="w-full sm:w-auto bg-gradient-to-l from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white px-4 py-3 rounded-2xl text-xl sm:text-3xl font-bold shadow-xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl active:translate-y-0 active:shadow-lg flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faEllipsisV} className="text-white" />
           </button>
 
-          {/* Menu rozwijane */}
           {menuOpen && (
             <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200">
               <Link
@@ -95,13 +261,12 @@ export default function Home() {
               >
                 Admin Panel
               </Link>
-              <Link
-                href="/customize"
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
+              <button
+                onClick={handleCustomizeClick}
+                className="w-full text-left block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
               >
                 Customize
-              </Link>
+              </button>
               <Link
                 href="/categories"
                 onClick={() => setMenuOpen(false)}
@@ -114,7 +279,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Pop-up (bez zmian) */}
+      {/* Pop-up */}
       <div
         className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-400 ${
           showPopup ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -133,7 +298,14 @@ export default function Home() {
           </div>
 
           <div className="h-full flex flex-col items-center justify-center text-center px-2 sm:px-4 overflow-y-auto">
-            <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-4 break-words">
+            <p
+              className="font-semibold text-gray-900 mb-4 break-words transition-all duration-300"
+              style={{
+                color: settings.quoteColor,
+                fontFamily: settings.quoteFont,
+                fontSize: `${settings.quoteSize}rem`,
+              }}
+            >
               {quote.content}
             </p>
             {quote.author && (
