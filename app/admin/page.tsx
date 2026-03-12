@@ -32,6 +32,7 @@ type Quote = {
   cytat: string;
   autor: string;
   czasUtworzenia: string;
+  image_url: string;
   kategoria: string;
 };
 
@@ -65,9 +66,11 @@ export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [AIQuote, setAIQuote] = useState(false);
-  const [formData, setFormData] = useState<{ cytat: string; autor: string }>({
+  const [formData, setFormData] = useState<{ cytat: string; autor: string, image_url: string, kategoria: string}>({
     cytat: "",
     autor: "",
+    image_url: "",
+    kategoria: "",
   });
   const [searchData, setSearchData] = useState<{ text: string; kategoria: string }>({
     text: "",
@@ -192,7 +195,7 @@ export default function AdminPage() {
   const openAddModal = () => {
     setEditingQuote(null);
     setAIQuote(false);
-    setFormData({ cytat: "", autor: "" });
+    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -200,7 +203,7 @@ export default function AdminPage() {
   const openEditModal = (quote: Quote) => {
     setEditingQuote(quote);
     setAIQuote(false);
-    setFormData({ cytat: quote.cytat, autor: quote.autor });
+    setFormData({ cytat: quote.cytat, autor: quote.autor, image_url: "", kategoria: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -208,14 +211,14 @@ export default function AdminPage() {
   const openAIModal = () => {
     setEditingQuote(null);
     setAIQuote(true);
-    setFormData({ cytat: "", autor: "" });
+    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setFormData({ cytat: "", autor: "" });
+    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
     setFormStatus({ type: null, message: "" });
     setFormLoading(false);
   };
