@@ -33,7 +33,7 @@ type Quote = {
   autor: string;
   czasUtworzenia: string;
   image_url: string;
-  kategoria: string;
+  kategorie: string;
 };
 
 type LoginData = {
@@ -66,15 +66,15 @@ export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [AIQuote, setAIQuote] = useState(false);
-  const [formData, setFormData] = useState<{ cytat: string; autor: string, image_url: string, kategoria: string}>({
+  const [formData, setFormData] = useState<{ cytat: string; autor: string, image_url: string, kategorie: string}>({
     cytat: "",
     autor: "",
     image_url: "",
-    kategoria: "",
+    kategorie: "",
   });
-  const [searchData, setSearchData] = useState<{ text: string; kategoria: string }>({
+  const [searchData, setSearchData] = useState<{ text: string; kategorie: string }>({
     text: "",
-    kategoria: "",
+    kategorie: "",
   });
   const [formStatus, setFormStatus] = useState<{ type: "success" | "error" | null; message: string }>({
     type: null,
@@ -144,9 +144,9 @@ export default function AdminPage() {
         quote.cytat.toLowerCase().includes(searchData.text.toLowerCase())
       );
     }
-    if (searchData.kategoria) {
+    if (searchData.kategorie) {
       filtered = filtered.filter((quote: Quote) => 
-        quote.kategoria === searchData.kategoria
+        quote.kategorie === searchData.kategorie
       );
     }
     setQuotesFiltered(filtered);
@@ -195,7 +195,7 @@ export default function AdminPage() {
   const openAddModal = () => {
     setEditingQuote(null);
     setAIQuote(false);
-    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
+    setFormData({ cytat: "", autor: "", image_url: "", kategorie: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -203,7 +203,7 @@ export default function AdminPage() {
   const openEditModal = (quote: Quote) => {
     setEditingQuote(quote);
     setAIQuote(false);
-    setFormData({ cytat: quote.cytat, autor: quote.autor, image_url: "", kategoria: ""});
+    setFormData({ cytat: quote.cytat, autor: quote.autor, image_url: "", kategorie: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -211,14 +211,14 @@ export default function AdminPage() {
   const openAIModal = () => {
     setEditingQuote(null);
     setAIQuote(true);
-    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
+    setFormData({ cytat: "", autor: "", image_url: "", kategorie: ""});
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setFormData({ cytat: "", autor: "", image_url: "", kategoria: ""});
+    setFormData({ cytat: "", autor: "", image_url: "", kategorie: ""});
     setFormStatus({ type: null, message: "" });
     setFormLoading(false);
   };
