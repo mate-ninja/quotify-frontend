@@ -21,15 +21,18 @@ import {
   faSyncAlt,
   faTimes,
   faUpload,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
+import { Quote } from "lucide-react";
 
 // Typy
 type Quote = {
   id: string;         
   cytat: string;
   autor: string;
-  czasUtworzenia: string; 
+  czasUtworzenia: string;
+  kategoria: string;
 };
 
 type LoginData = {
@@ -54,6 +57,7 @@ export default function AdminPage() {
 
   // Lista cytatów
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quotesFiltered, setQuotesFiltered] = useState<Quote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [quotesError, setQuotesError] = useState<string | null>(null);
 
@@ -64,6 +68,10 @@ export default function AdminPage() {
   const [formData, setFormData] = useState<{ cytat: string; autor: string }>({
     cytat: "",
     autor: "",
+  });
+  const [searchData, setSearchData] = useState<{ text: string; kategoria: string }>({
+    text: "",
+    kategoria: "",
   });
   const [formStatus, setFormStatus] = useState<{ type: "success" | "error" | null; message: string }>({
     type: null,
@@ -113,18 +121,33 @@ export default function AdminPage() {
         return;
       }
       if (!response.ok) throw new Error("Błąd pobierania cytatów");
-      const data = await response.json();
+      let data = await response.json();
       
 
       data.sort((a: Quote, b: Quote) => Number(a.id) - Number(b.id));
-      
       setQuotes(data);
+      setQuotesFiltered(data);
     } catch (error: any) {
       setQuotesError(error.message);
     } finally {
       setQuotesLoading(false);
     }
   };
+
+  const filterQuotes = () => {
+    let filtered = [...quotes];
+    if (searchData.text) {
+      filtered = filtered.filter((quote: Quote) => 
+        quote.cytat.toLowerCase().includes(searchData.text.toLowerCase())
+      );
+    }
+    if (searchData.kategoria) {
+      filtered = filtered.filter((quote: Quote) => 
+        quote.kategoria === searchData.kategoria
+      );
+    }
+    setQuotesFiltered(filtered);
+  }
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -387,7 +410,6 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         ) : (
-          // Panel admina
           <Card className="w-full max-w-5xl bg-white/95 backdrop-blur-sm shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-4xl text-emerald-700">Panel Administratora</CardTitle>
@@ -428,9 +450,22 @@ export default function AdminPage() {
                   {quotesError}
                 </div>
               ) : (
-                <div className="overflow-x-auto max-h-[60vh]">
+                <div className="overflow-x-auto max-h-[60vh] flex flex-col">
+                  <div className="sticky top-0 bg-white border-b flex justify-center p-1 gap-2">
+                    <Input id="input-quote-search" placeholder="Wyszukaj cytaty" type="text" className="max-w-[80%]" 
+                    onChange={(e) => {
+                      setSearchData({ ...searchData, text: e.target.value })
+                    }}></Input>
+                    <Button
+                      onClick={filterQuotes}
+                      className="bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white"
+                    >
+                      <FontAwesomeIcon icon={faSearch} className="mr-2 h-4 w-4" />
+                      Wyszukaj
+                    </Button>
+                  </div>
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 bg-white border-b">
+                    <thead className="sticky top-11 bg-white border-b">
                       <tr>
                         <th className="pb-2 pr-4">ID</th>
                         <th className="pb-2 pr-4">Cytat</th>
@@ -440,7 +475,7 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {quotes.map((quote) => (
+                      {quotesFiltered.map((quote) => (
                         <tr key={quote.id} className="border-b last:border-0 hover:bg-gray-50">
                           <td className="py-3 pr-4 align-top font-mono text-sm text-center align-middle"><b>{quote.id}</b></td>
                           <td className="py-3 pr-4 max-w-md break-words">{quote.cytat}</td>
@@ -479,7 +514,7 @@ export default function AdminPage() {
               )}
             </CardContent>
             <CardFooter className="justify-center text-sm text-gray-500 border-t pt-4">
-              Łącznie cytatów: {quotes.length}
+              Łącznie cytatów: {quotes.length}, Cytaty wyświetlane: {quotesFiltered.length}
             </CardFooter>
           </Card>
         )}
