@@ -60,10 +60,13 @@ export default function Home() {
 
   async function getJSONData(): Promise<[string, string]> {
     const response = await fetch(
-      `https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/random${settings.category ? "?kategoria=" + encodeURIComponent(settings.category) : ""}`,
+      `https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/random${settings.category ? "?kategoria=" + settings.category : ""}`,
       {
         method: "GET",
         cache: "no-store",
+        headers: {
+          kategoria: encodeURIComponent(settings.category) ?? ""
+        }
       }
     );
     if (!response.ok) throw new Error("Błąd pobierania danych");
@@ -244,7 +247,7 @@ export default function Home() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Wybierz kategorię</h3>
             <button
-              onClick={() => setCustomizeOpen(false)}
+              onClick={() => setCategoriesOpen(false)}
               className="text-gray-500 hover:text-gray-700"
             >
               <FontAwesomeIcon icon={faTimes} />
