@@ -25,6 +25,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
 import { Quote } from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@radix-ui/react-select";
 
 // Typy
 type Quote = {
@@ -109,6 +110,10 @@ export default function AdminPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    filterQuotes()
+  }, [searchData])
+
  const fetchQuotes = async () => {
     if (!user) return;
     setQuotesLoading(true);
@@ -146,7 +151,7 @@ export default function AdminPage() {
     }
     if (searchData.kategorie) {
       filtered = filtered.filter((quote: Quote) => 
-        quote.kategorie === searchData.kategorie
+        quote.kategorie == searchData.kategorie
       );
     }
     setQuotesFiltered(filtered);
@@ -167,7 +172,7 @@ export default function AdminPage() {
         throw new Error(errorData.message || "Błąd logowania");
       }
       const data = await response.json();
-      const token = data.token || data.accessToken;
+      const token = data.token;
       if (!token) throw new Error("Brak tokena w odpowiedzi");
       localStorage.setItem("token", token);
       if (data.email) localStorage.setItem("email", data.email);
@@ -259,6 +264,7 @@ export default function AdminPage() {
 
     const payload = AIQuote ? {
       AIprompt: formData.cytat,
+      kategorie: formData.kategorie,
       czasUtworzenia: new Date().toISOString()
     }
     : {
@@ -442,7 +448,26 @@ export default function AdminPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <div className="flex align-middle border-b w-full pl-6 pr-6 pt-1 pb-1 gap-3">
+              <FontAwesomeIcon icon={faSearch} className="mr-2 h-6 w-6 pt-1.5 absolute left-[55%]"/>
+              <Input id="input-quote-search" placeholder="Wyszukaj cytaty" type="text" className="max-w-[60%] mb-1" autoComplete="off"
+              onChange={(e) => {
+                setSearchData({ ...searchData, text: e.target.value })
+              }}>
+              </Input>
+              <select
+              onChange={(e) => {
+                setSearchData({...searchData, kategorie: e.target.value})
+              }}
+              className="w-full pl-2 border border-gray-300 rounded-md max-w-[40%]">
+                <option value="">Wszystko</option>
+                <option value="Zabawne">Zabawne</option>
+                <option value="Głębokie">Głębokie</option>
+                <option value="Motywujące">Motywujące</option>
+                <option value="Limbus Company">Limbus Company</option>
+              </select>
+            </div>
+            <CardContent className="pb-0">
               {quotesLoading && !quotes.length ? (
                 <div className="flex justify-center py-8">
                   <FontAwesomeIcon icon={faSpinner} spin className="h-8 w-8 text-emerald-600" />
@@ -454,21 +479,8 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto max-h-[60vh] flex flex-col">
-                  <div className="sticky top-0 bg-white border-b flex justify-center p-1 gap-2">
-                    <Input id="input-quote-search" placeholder="Wyszukaj cytaty" type="text" className="max-w-[80%]" 
-                    onChange={(e) => {
-                      setSearchData({ ...searchData, text: e.target.value })
-                    }}></Input>
-                    <Button
-                      onClick={filterQuotes}
-                      className="bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white"
-                    >
-                      <FontAwesomeIcon icon={faSearch} className="mr-2 h-4 w-4" />
-                      Wyszukaj
-                    </Button>
-                  </div>
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-11 bg-white border-b">
+                    <thead className="sticky top-0 bg-white border-b">
                       <tr>
                         <th className="pb-2 pr-4">ID</th>
                         <th className="pb-2 pr-4">Cytat</th>
@@ -566,6 +578,23 @@ export default function AdminPage() {
                     />
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label htmlFor="modal-category">
+                    Kategoria cytatu <span className="text-red-500">*</span>
+                  </Label>
+                  <select className="w-full p-2 border border-gray-300 rounded-md"
+                    id="modal-category"
+                    value={formData.kategorie}
+                    onChange={(e) => setFormData({...formData, kategorie: e.target.value})}
+                    required
+                  >
+                    <option value="">Dowolny</option>
+                    <option value="Zabawne">Zabawny</option>
+                    <option value="Głębokie">Głęboki</option>
+                    <option value="Motywujące">Motywujący</option>
+                    <option value="Limbus Company">Limbus Company</option>
+                  </select>
+                </div>
                 {formStatus.type && (
                   <div
                     className={`p-4 rounded-lg flex items-center gap-2 ${
