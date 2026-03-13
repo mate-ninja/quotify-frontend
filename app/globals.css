@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root { /* zmienne shadcn/ui */ }
-  .dark { /* zmienne dark mode */ }
+  :root {}
+  .dark {}
 }
 * {
   box-sizing: border-box;

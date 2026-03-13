@@ -16,6 +16,7 @@ type CustomizeSettings = {
   quoteColor: string;
   quoteFont: string;
   quoteSize: number;
+  category: string;
 };
 
 export default function Home() {
@@ -24,15 +25,18 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [customizeOpen, setCustomizeOpen] = useState<boolean>(false);
+  const [categoriesOpen, setCategoriesOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const customizeRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
 
   // Domyślne ustawienia
   const defaultSettings: CustomizeSettings = {
     background: "url('/images/photo.png')",
-    quoteColor: "#111827", // text-gray-900
+    quoteColor: "#111827",
     quoteFont: "Arial, sans-serif",
-    quoteSize: 2.25, // text-4xl to 2.25rem
+    quoteSize: 2.25,
+    category: ""
   };
 
   const [settings, setSettings] = useState<CustomizeSettings>(defaultSettings);
@@ -56,7 +60,7 @@ export default function Home() {
 
   async function getJSONData(): Promise<[string, string]> {
     const response = await fetch(
-      "https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/random",
+      `https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/random${settings.category ? "?kategoria=" + encodeURIComponent(settings.category) : ""}`,
       {
         method: "GET",
         cache: "no-store",
@@ -91,6 +95,9 @@ export default function Home() {
       if (customizeRef.current && !customizeRef.current.contains(event.target as Node)) {
         setCustomizeOpen(false);
       }
+      if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
+        setCategoriesOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -98,6 +105,7 @@ export default function Home() {
 
   const handleCustomizeClick = () => {
     setMenuOpen(false);
+    setCategoriesOpen(false);
     setCustomizeOpen(true);
   };
 
@@ -119,6 +127,10 @@ export default function Home() {
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings({ ...settings, quoteSize: parseFloat(e.target.value) });
+  };
+  
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSettings({ ...settings, category: e.target.value });
   };
 
   const resetSettings = () => {
@@ -224,6 +236,42 @@ export default function Home() {
         </div>
       )}
 
+      {categoriesOpen && (
+        <div
+          ref={categoriesRef}
+          className="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-white rounded-xl shadow-2xl z-30 p-5 border border-gray-200"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Wybierz kategorię</h3>
+            <button
+              onClick={() => setCustomizeOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Kategoria cytatu
+              </label>
+              <select
+                value={settings.category}
+                onChange={handleCategoryChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Wszystko</option>
+                <option value="Zabawne">Zabawne</option>
+                <option value="Głębokie">Głębokie</option>
+                <option value="Motywujące">Motywujące</option>
+                <option value="Limbus Company">Limbus Company</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Napisy */}
       <div className="w-full sm:w-[500px] flex flex-col items-center justify-center mb-4 sm:mb-8 text-center px-4 sm:px-0">
         <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[180px] leading-none font-sans">
@@ -256,7 +304,11 @@ export default function Home() {
             <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200">
               <Link
                 href="/admin"
-                onClick={() => setMenuOpen(false)}
+                onClick={() => {
+                    setMenuOpen(false);
+                    setCategoriesOpen(false);
+                  }
+                }
                 className="block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
               >
                 Admin Panel
@@ -267,13 +319,16 @@ export default function Home() {
               >
                 Customize
               </button>
-              <Link
-                href="/categories"
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors"
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setCustomizeOpen(false);
+                  setCategoriesOpen(true);
+                }}
+                className="w-full text-left block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
               >
                 Kategorie
-              </Link>
+              </button>
             </div>
           )}
         </div>
