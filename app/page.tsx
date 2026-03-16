@@ -22,6 +22,8 @@ type CustomizeSettings = {
 export default function Home() {
   const [quote, setQuote] = useState<Quote>({ content: "", author: "" });
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [errorPopup, setErrorPopup] = useState<boolean>(false);
+  const [errorPopupTranslate, setErrorPopupTranslate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [customizeOpen, setCustomizeOpen] = useState<boolean>(false);
@@ -29,6 +31,7 @@ export default function Home() {
   const menuRef = useRef<HTMLDivElement>(null);
   const customizeRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
+  const errorPopupRef = useRef<HTMLDivElement>(null);
 
   // Domyślne ustawienia
   const defaultSettings: CustomizeSettings = {
@@ -82,12 +85,21 @@ export default function Home() {
       setShowPopup(true);
     } catch (error) {
       console.error("BŁĄD:", error);
+      setErrorPopup(true);
+      setTimeout(()=>setErrorPopupTranslate(true), 10);
     } finally {
       setLoading(false);
     }
   };
 
-  const closePopup = (): void => setShowPopup(false);
+  const closePopup = () => setShowPopup(false);
+  
+  const closeErrorPopup = () => {
+    if (errorPopupTranslate){
+      setErrorPopupTranslate(false);
+      setTimeout(()=>setErrorPopup(false), 500);
+    }
+  }
 
   // Zamknięcie pop-up po kliknięciu poza
   useEffect(() => {
@@ -100,6 +112,9 @@ export default function Home() {
       }
       if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
         setCategoriesOpen(false);
+      }
+      if (errorPopupRef.current && !errorPopupRef.current.contains(event.target as Node)) {
+        closeErrorPopup();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -270,6 +285,29 @@ export default function Home() {
                 <option value="Motywujące">Motywujące</option>
                 <option value="Limbus Company">Limbus Company</option>
               </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errorPopup && (
+        <div
+          ref={errorPopupRef}
+          className={`fixed bottom-20 right-4 sm:right-8 w-72 sm:w-80 bg-red-300 rounded-xl shadow-2xl z-30 p-5 border-2 border-red-400 transform ${errorPopupTranslate ? "" : "translate-x-full"} transition-transform duration-500 ease-in-out`}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Brak cytatów w bazie</h3>
+            <button
+              onClick={closeErrorPopup}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-gray-700">Spróbuj zmienić filtry kategorii</p>
             </div>
           </div>
         </div>
