@@ -296,7 +296,7 @@ export default function Home() {
           className={`fixed bottom-20 right-4 sm:right-8 w-72 sm:w-80 bg-red-300 rounded-xl shadow-2xl z-30 p-5 border-2 border-red-400 transform ${errorPopupTranslate ? "" : "translate-x-full"} transition-transform duration-500 ease-in-out`}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Brak cytatów w bazie</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Błąd pobierania cytatów z bazy</h3>
             <button
               onClick={closeErrorPopup}
               className="text-gray-600 hover:text-gray-800"
@@ -307,7 +307,7 @@ export default function Home() {
 
           <div className="space-y-4">
             <div>
-              <p className="text-gray-700">Spróbuj zmienić filtry kategorii</p>
+              <p className="text-gray-700">Spróbuj zmienić filtry kategorii albo spróbuj później</p>
             </div>
           </div>
         </div>
