@@ -22,6 +22,7 @@ import {
   faTimes,
   faUpload,
   faSearch,
+  faImage, // NEW: ikona dla obrazka (opcjonalnie)
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
 import { Quote } from "lucide-react";
@@ -208,7 +209,7 @@ export default function AdminPage() {
   const openEditModal = (quote: Quote) => {
     setEditingQuote(quote);
     setAIQuote(false);
-    setFormData({ cytat: quote.cytat, autor: quote.autor, image_url: "", kategorie: ""});
+    setFormData({ cytat: quote.cytat, autor: quote.autor, image_url: quote.image_url || "", kategorie: quote.kategorie || ""}); // CHANGED: wypełniamy image_url
     setFormStatus({ type: null, message: "" });
     setShowModal(true);
   };
@@ -325,7 +326,7 @@ export default function AdminPage() {
       minute: "2-digit",
     });
   };
-
+  
   return (
     <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: "url('/images/photo.png')" }}>
       {/* Przycisk powrotu */}
@@ -419,7 +420,8 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="w-full max-w-5xl bg-white/95 backdrop-blur-sm shadow-xl">
+          // CHANGED: powiększony panel (max-w-5xl -> max-w-7xl)
+          <Card className="w-full max-w-7xl bg-white/95 backdrop-blur-sm shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-4xl text-emerald-700">Panel Administratora</CardTitle>
               <div className="flex gap-2">
@@ -478,13 +480,17 @@ export default function AdminPage() {
                   {quotesError}
                 </div>
               ) : (
-                <div className="overflow-x-auto max-h-[60vh] flex flex-col">
-                  <table className="w-full text-left border-collapse">
+                // NEW: zwiększona minimalna szerokość tabeli dla przewijania na telefonie
+                <div className="overflow-x-auto max-h-[60vh]">
+                  <table className="w-full text-left border-collapse min-w-[1200px]">
                     <thead className="sticky top-0 bg-white border-b">
                       <tr>
                         <th className="pb-2 pr-4">ID</th>
                         <th className="pb-2 pr-4">Cytat</th>
                         <th className="pb-2 pr-4">Autor</th>
+                        <th className="pb-2 pr-4">Kategoria</th>
+                        {/* NEW: kolumna Obraz */}
+                        <th className="pb-2 pr-4">Obraz</th>
                         <th className="pb-2 pr-4">Data dodania</th>
                         <th className="pb-2">Akcje</th>
                       </tr>
@@ -495,6 +501,17 @@ export default function AdminPage() {
                           <td className="py-3 pr-4 align-top font-mono text-sm text-center align-middle"><b>{quote.id}</b></td>
                           <td className="py-3 pr-4 max-w-md break-words">{quote.cytat}</td>
                           <td className="py-3 pr-4">{quote.autor}</td>
+                          <td className="py-3 pr-4">{quote.kategorie}</td>
+                          {/* NEW: komórka obrazka */}
+                          <td className="py-3 pr-4 text-sm text-gray-600 max-w-[150px] truncate">
+                            {quote.image_url ? (
+                              <a href={quote.image_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                link
+                              </a>
+                            ) : (
+                              <span className="text-gray-400">brak</span>
+                            )}
+                          </td>
                           <td className="py-3 pr-4 text-sm text-gray-600">{formatDateTime(quote.czasUtworzenia)}</td>
                           <td className="py-3">
                             <div className="flex gap-2">
@@ -518,7 +535,8 @@ export default function AdminPage() {
                       ))}
                       {quotes.length === 0 && !quotesLoading && (
                         <tr>
-                          <td colSpan={5} className="py-8 text-center text-gray-500">
+                          {/* CHANGED: zwiększono colSpan z 5 na 7 */}
+                          <td colSpan={7} className="py-8 text-center text-gray-500">
                             Brak cytatów. Kliknij "Dodaj", aby dodać pierwszy.
                           </td>
                         </tr>
@@ -594,6 +612,19 @@ export default function AdminPage() {
                     <option value="Motywujące">Motywujący</option>
                     <option value="Limbus Company">Limbus Company</option>
                   </select>
+                </div>
+                {/* NEW: pole URL obrazka */}
+                <div className="space-y-2">
+                  <Label htmlFor="modal-image">
+                    Tło cytatu (opcjonalne)
+                  </Label>
+                  <Input
+                    id="modal-image"
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  />
                 </div>
                 {formStatus.type && (
                   <div

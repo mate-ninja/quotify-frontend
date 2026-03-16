@@ -9,6 +9,7 @@ import "./globals.css";
 type Quote = {
   content: string;
   author: string;
+  image_url?: string; 
 };
 
 type CustomizeSettings = {
@@ -61,32 +62,33 @@ export default function Home() {
     localStorage.setItem("customizeSettings", JSON.stringify(settings));
   }, [settings]);
 
-  async function getJSONData(): Promise<[string, string]> {
+  async function getJSONData(): Promise<[string, string, string?]> {
     const response = await fetch(
       `https://cetuspro-quotify02-03.azurewebsites.net/api/Quote/random${settings.category ? "?kategoria=" + settings.category : ""}`,
       {
         method: "GET",
-        cache: "no-store",
-        headers: {
-          kategoria: encodeURIComponent(settings.category) ?? ""
-        }
+        cache: "no-store"
       }
     );
     if (!response.ok) throw new Error("Błąd pobierania danych");
-    return await response.json();
+    return await response.json(); // zwraca tablicę
   }
 
   const handleRandomQuote = async (): Promise<void> => {
     try {
       setLoading(true);
       setShowPopup(false);
-      const data = await getJSONData();
-      setQuote({ content: data[0], author: data[1] });
+      const data = await getJSONData(); // data to tablica, np. ["content", "author", "https://..."]
+      setQuote({ 
+        content: data[0], 
+        author: data[1], 
+        image_url: data[2] // trzeci element to URL obrazka (może być undefined)
+      });
       setShowPopup(true);
     } catch (error) {
       console.error("BŁĄD:", error);
       setErrorPopup(true);
-      setTimeout(()=>setErrorPopupTranslate(true), 10);
+      setTimeout(() => setErrorPopupTranslate(true), 10);
     } finally {
       setLoading(false);
     }
@@ -153,6 +155,11 @@ export default function Home() {
 
   const resetSettings = () => {
     setSettings(defaultSettings);
+  };
+
+  const getOutlineColor = (color: string) => {
+    const darkColors = ['#111827', '#000000', '#000'];
+    return darkColors.includes(color.toLowerCase()) ? '#ffffff' : '#000000';
   };
 
   return (
@@ -382,9 +389,13 @@ export default function Home() {
         }`}
       >
         <div
-          className={`bg-white p-6 sm:p-8 rounded-2xl w-[95%] sm:w-[90%] max-w-[700px] h-[400px] sm:h-[500px] relative shadow-2xl transition-all duration-400 ${
+          className={`p-6 sm:p-8 rounded-2xl w-[95%] sm:w-[90%] max-w-[700px] h-[400px] sm:h-[500px] relative shadow-2xl transition-all duration-400 bg-cover bg-center ${
             showPopup ? "opacity-100 scale-100" : "opacity-0 scale-90"
           }`}
+          style={{
+            backgroundColor: !quote.image_url ? '#ffffff' : undefined,
+            backgroundImage: quote.image_url ? `url('${quote.image_url}')` : undefined,
+          }}
         >
           <div
             onClick={closePopup}
@@ -400,6 +411,10 @@ export default function Home() {
                 color: settings.quoteColor,
                 fontFamily: settings.quoteFont,
                 fontSize: `${settings.quoteSize}rem`,
+                textShadow: `1px 1px 0 ${getOutlineColor(settings.quoteColor)}, 
+                            -1px -1px 0 ${getOutlineColor(settings.quoteColor)}, 
+                            1px -1px 0 ${getOutlineColor(settings.quoteColor)}, 
+                            -1px 1px 0 ${getOutlineColor(settings.quoteColor)}`,
               }}
             >
               {quote.content}
