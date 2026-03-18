@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faQuoteLeft, faQuoteRight } from '@fortawesome/free-solid-svg-icons';
 import "./globals.css";
 
 type Quote = {
@@ -387,7 +388,7 @@ export default function Home() {
         }`}
       >
         <div
-          className={`p-6 sm:p-8 rounded-2xl w-[95%] sm:w-[90%] max-w-[700px] h-[400px] sm:h-[500px] relative shadow-2xl transition-all duration-400 bg-cover bg-center ${
+          className={`p-5 sm:p-8 rounded-2xl w-[95%] sm:w-[90%] max-w-[850px] h-[400px] sm:h-[500px] relative shadow-2xl transition-all duration-400 bg-cover bg-center ${
             showPopup ? "opacity-100 scale-100" : "opacity-0 scale-90"
           }`}
           style={{
@@ -402,9 +403,13 @@ export default function Home() {
             <FontAwesomeIcon icon={faTimes} />
           </div>
 
-          <div className="h-full flex flex-col items-center justify-center text-center px-2 sm:px-4 overflow-y-auto">
+          <div className="h-full flex flex-col items-start justify-center px-2 sm:px-4 overflow-y-auto">
+            <FontAwesomeIcon 
+              icon={faQuoteLeft} 
+              className="text-emerald-600 w-20 h-20 mb-4" 
+            />
             <p
-              className="font-semibold text-gray-900 mb-4 break-words transition-all duration-300"
+              className="font-semibold text-gray-900 mb-4 break-words transition-all duration-300 text-left"
               style={{
                 color: settings.quoteColor,
                 fontFamily: settings.quoteFont,
@@ -418,9 +423,12 @@ export default function Home() {
               {quote.content}
             </p>
             {quote.author && (
-              <p className="text-xl sm:text-2xl text-gray-600 italic">
-                — {quote.author}
-              </p>
+              <div className="w-full flex flex-col items-end">
+                <p className="text-xl sm:text-2xl text-gray-600 italic text-right">
+                  {quote.author}
+                </p>
+                <hr className="w-20 border-2 border-emerald-600 h-0 rounded mt-2" />
+              </div>
             )}
           </div>
         </div>
