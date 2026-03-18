@@ -57,7 +57,6 @@ export default function Home() {
     }
   }, []);
 
-  // zapisywanie w localstorage
   useEffect(() => {
     localStorage.setItem("customizeSettings", JSON.stringify(settings));
   }, [settings]);
@@ -71,18 +70,18 @@ export default function Home() {
       }
     );
     if (!response.ok) throw new Error("Błąd pobierania danych");
-    return await response.json(); // zwraca tablicę
+    return await response.json();
   }
 
   const handleRandomQuote = async (): Promise<void> => {
     try {
       setLoading(true);
       setShowPopup(false);
-      const data = await getJSONData(); // data to tablica, np. ["content", "author", "https://..."]
+      const data = await getJSONData();
       setQuote({ 
         content: data[0], 
         author: data[1], 
-        image_url: data[2] // trzeci element to URL obrazka (może być undefined)
+        image_url: data[2]
       });
       setShowPopup(true);
     } catch (error) {
@@ -103,7 +102,6 @@ export default function Home() {
     }
   }
 
-  // Zamknięcie pop-up po kliknięciu poza
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
