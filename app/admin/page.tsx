@@ -136,7 +136,7 @@ export default function AdminPage() {
 
       data.sort((a: Quote, b: Quote) => Number(a.id) - Number(b.id));
       setQuotes(data);
-      setQuotesFiltered(data);
+      if (!searchData.kategorie && !searchData.text) setQuotesFiltered(data);
     } catch (error: any) {
       setQuotesError(error.message);
     } finally {
@@ -624,13 +624,12 @@ export default function AdminPage() {
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="modal-category">
-                    Kategoria cytatu <span className="text-red-500">*</span>
+                    Kategoria cytatu
                   </Label>
                   <select className="w-full p-2 border border-gray-300 rounded-md"
                     id="modal-category"
                     value={formData.kategorie}
                     onChange={(e) => setFormData({...formData, kategorie: e.target.value})}
-                    required
                   >
                     <option value="">Wszystko</option>
                     <option value="Zabawne">Zabawne</option>
