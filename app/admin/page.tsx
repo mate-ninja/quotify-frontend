@@ -137,6 +137,7 @@ export default function AdminPage() {
       data.sort((a: Quote, b: Quote) => Number(a.id) - Number(b.id));
       setQuotes(data);
       if (!searchData.kategorie && !searchData.text) setQuotesFiltered(data);
+      else filterQuotesData(data);
     } catch (error: any) {
       setQuotesError(error.message);
     } finally {
@@ -146,6 +147,21 @@ export default function AdminPage() {
 
   const filterQuotes = () => {
     let filtered = [...quotes];
+    if (searchData.text) {
+      filtered = filtered.filter((quote: Quote) => 
+        quote.cytat.toLowerCase().includes(searchData.text.toLowerCase())
+      );
+    }
+    if (searchData.kategorie) {
+      filtered = filtered.filter((quote: Quote) => 
+        quote.kategorie == searchData.kategorie
+      );
+    }
+    setQuotesFiltered(filtered);
+  }
+
+  const filterQuotesData = (data : Quote[]) => {
+    let filtered = data;
     if (searchData.text) {
       filtered = filtered.filter((quote: Quote) => 
         quote.cytat.toLowerCase().includes(searchData.text.toLowerCase())
