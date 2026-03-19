@@ -22,6 +22,7 @@ import {
   faTimes,
   faUpload,
   faSearch,
+  faRobot,
   faImage, // NEW: ikona dla obrazka (opcjonalnie)
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
@@ -328,20 +329,19 @@ export default function AdminPage() {
   };
   
   return (
-    <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: "url('/images/photo.png')" }}>
+    <div className="min-h-screen bg-cover bg-center relative bg-white" style={{ backgroundColor: '#e9f8f3'  }}>
       {/* Przycisk powrotu */}
       <div className="absolute top-4 left-4">
         <Link href="/">
-          <Button variant="outline" className="bg-white/80 backdrop-blur-sm">
-            <FontAwesomeIcon icon={faArrowLeft} className="mr-2 h-4 w-4" />
-            Strona główna
+          <Button variant="outline" size="sm" className="bg-white/80 backdrop-blur-sm px-2 sm:px-4">
+            <FontAwesomeIcon icon={faArrowLeft} className="mr-0 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Strona główna</span>
           </Button>
         </Link>
       </div>
-
       {/* Panel użytkownika (jeśli zalogowany) */}
       {user && (
-        <div className="absolute top-4 right-4 flex items-center gap-2">
+        <div className="absolute top-4 right-4 flex items-center gap-2 bg-white py-1 px-3 rounded-[8px]">
           <span className="text-white bg-black/30 px-3 py-1 rounded-full text-sm">
             {user.email || "Zalogowano"}
           </span>
@@ -355,117 +355,143 @@ export default function AdminPage() {
       <div className="flex flex-col items-center justify-start min-h-screen bg-black/20 p-4 pt-24">
         {!user ? (
           // Formularz logowania
-          <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-3xl text-emerald-700">Logowanie</CardTitle>
-              <CardDescription>Wprowadź dane logowania, aby zarządzać cytatami</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="text"
-                    placeholder="Wpisz nazwę użytkownika"
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Hasło</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Wpisz hasło"
-                    value={loginData.password}
-                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    required
-                  />
-                </div>
-                {loginStatus.type && (
-                  <div
-                    className={`p-3 rounded-lg flex items-center gap-2 ${
-                      loginStatus.type === "success"
-                        ? "bg-green-100 text-green-800 border border-green-300"
-                        : "bg-red-100 text-red-800 border border-red-300"
-                    }`}
-                  >
-                    <FontAwesomeIcon
-                      icon={loginStatus.type === "success" ? faCheck : faExclamationTriangle}
-                      className="h-5 w-5"
-                    />
-                    {loginStatus.message}
-                  </div>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white"
-                  disabled={loginLoading}
+
+        <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[700px]">
+          {/* Lewa strona - zdjęcie */}
+          <div 
+            className="md:w-1/2 h-64 md:h-auto bg-cover bg-center" 
+            style={{ backgroundImage: "url('/images/green-bg.png')" }}
+          />
+
+          {/* Prawa strona */}
+          <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+            <h2 className="text-3xl font-bold text-emerald-700 mb-2">Panel Administratora</h2>
+            <p className="text-gray-600 mb-10">Zaloguj się, aby zarządzać cytatami</p>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="text-gray-700">Email</Label>
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="Wpisz email"
+                  value={loginData.email}
+                  onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password" className="text-gray-700">Hasło</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Wpisz hasło"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              {loginStatus.type && (
+                <div
+                  className={`p-3 rounded-lg flex items-center gap-2 ${
+                    loginStatus.type === "success"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
                 >
-                  {loginLoading ? (
-                    <>
-                      <FontAwesomeIcon icon={faSpinner} spin className="mr-2 h-4 w-4" />
-                      Logowanie...
-                    </>
-                  ) : (
-                    <>
-                      <FontAwesomeIcon icon={faSignInAlt} className="mr-2 h-4 w-4" />
-                      Zaloguj się
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                  <FontAwesomeIcon
+                    icon={loginStatus.type === "success" ? faCheck : faExclamationTriangle}
+                    className="h-5 w-5"
+                  />
+                  {loginStatus.message}
+                </div>
+              )}
+              <hr />
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white rounded-2xl"
+                disabled={loginLoading}
+              >
+                {loginLoading ? (
+                  <>
+                    <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                    Logowanie...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faSignInAlt} className="mr-2" />
+                    Zaloguj się
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+
         ) : (
           // CHANGED: powiększony panel (max-w-5xl -> max-w-7xl)
           <Card className="w-full max-w-7xl bg-white/95 backdrop-blur-sm shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-4xl text-emerald-700">Panel Administratora</CardTitle>
-              <div className="flex gap-2">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-2">
+              <CardTitle className="text-2xl sm:text-4xl text-emerald-700">Panel Administratora</CardTitle>
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   onClick={fetchQuotes}
                   disabled={quotesLoading}
-                  className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                  size="sm"
+                  className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 flex-1 sm:flex-none"
                 >
                   <FontAwesomeIcon icon={faSyncAlt} className={`mr-2 h-4 w-4 ${quotesLoading ? "animate-spin" : ""}`} />
-                  Odśwież
+                  <span className="hidden sm:inline">Odśwież</span>
                 </Button>
                 <Button
                   onClick={openAddModal}
-                  className="bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white"
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-700 to-emerald-500 hover:from-emerald-800 hover:to-emerald-600 text-white flex-1 sm:flex-none"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2 h-4 w-4" />
-                  Dodaj
+                  <span className="hidden sm:inline">Dodaj</span>
                 </Button>
                 <Button
                   onClick={openAIModal}
-                  className="bg-gradient-to-r from-amber-300 to-amber-500 hover:from-amber-400 hover:to-amber-600 text-white"
+                  size="sm"
+                  className="bg-gradient-to-r from-amber-300 to-amber-500 hover:from-amber-400 hover:to-amber-600 text-white flex-1 sm:flex-none"
                 >
-                  <FontAwesomeIcon icon={faUpload} className="mr-2 h-4 w-4" />
-                  Dodaj za pomocą AI
+                  <FontAwesomeIcon icon={faRobot} className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">AI</span>
                 </Button>
               </div>
             </CardHeader>
-            <div className="flex align-middle border-b w-full pl-6 pr-6 pt-1 pb-1 gap-3">
-              <FontAwesomeIcon icon={faSearch} className="mr-2 h-6 w-6 pt-1.5 absolute left-[55%]"/>
-              <Input id="input-quote-search" placeholder="Wyszukaj cytaty" type="text" className="max-w-[60%] mb-1" autoComplete="off"
-              onChange={(e) => {
-                setSearchData({ ...searchData, text: e.target.value })
-              }}>
-              </Input>
+            <div className="flex flex-col sm:flex-row border-b w-full px-4 sm:px-6 py-3 gap-3">
+              <div className="relative flex-1">
+                <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="input-quote-search"
+                  placeholder="Wyszukaj cytaty..."
+                  type="text"
+                  className="pl-10 w-full"
+                  value={searchData.text}
+                  onChange={(e) => setSearchData({ ...searchData, text: e.target.value })}
+                />
+              </div>
               <select
-              onChange={(e) => {
-                setSearchData({...searchData, kategorie: e.target.value})
-              }}
-              className="w-full pl-2 border border-gray-300 rounded-md max-w-[40%]">
+                value={searchData.kategorie}
+                onChange={(e) => setSearchData({ ...searchData, kategorie: e.target.value })}
+                className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 bg-white"
+              >
                 <option value="">Wszystko</option>
                 <option value="Zabawne">Zabawne</option>
                 <option value="Głębokie">Głębokie</option>
                 <option value="Motywujące">Motywujące</option>
+                <option value="Zycie">Życie</option>
+                <option value="Milosc">Miłość</option>
+                <option value="Sukces">Sukces</option>
+                <option value="Szczescie">Szczęście</option>
+                <option value="Nauka">Nauka</option>
+                <option value="Przyjazn">Przyjaźń</option>
                 <option value="Limbus Company">Limbus Company</option>
               </select>
             </div>
@@ -606,10 +632,16 @@ export default function AdminPage() {
                     onChange={(e) => setFormData({...formData, kategorie: e.target.value})}
                     required
                   >
-                    <option value="">Dowolny</option>
-                    <option value="Zabawne">Zabawny</option>
-                    <option value="Głębokie">Głęboki</option>
-                    <option value="Motywujące">Motywujący</option>
+                    <option value="">Wszystko</option>
+                    <option value="Zabawne">Zabawne</option>
+                    <option value="Głębokie">Głębokie</option>
+                    <option value="Motywujące">Motywujące</option>
+                    <option value="Zycie">Życie</option>
+                    <option value="Milosc">Miłość</option>
+                    <option value="Sukces">Sukces</option>
+                    <option value="Szczescie">Szczęście</option>
+                    <option value="Nauka">Nauka</option>
+                    <option value="Przyjazn">Przyjaźń</option>
                     <option value="Limbus Company">Limbus Company</option>
                   </select>
                 </div>

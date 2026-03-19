@@ -166,131 +166,142 @@ export default function Home() {
       className="w-screen h-screen flex flex-col items-center justify-center bg-cover bg-center relative transition-all duration-300"
       style={{ backgroundImage: settings.background }}
     >
-      {/* Panel Customize */}
+      {/* Panel Customize - teraz jako modal centralny */}
       {customizeOpen && (
-        <div
-          ref={customizeRef}
-          className="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-white rounded-xl shadow-2xl z-30 p-5 border border-gray-200"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Dostosuj wygląd</h3>
-            <button
-              onClick={() => setCustomizeOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* Tło */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tło strony
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleBackgroundChange}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-              />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            ref={customizeRef}
+            className="bg-white rounded-2xl w-full max-w-md relative shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Dostosuj wygląd</h3>
               <button
-                onClick={() => setSettings({ ...settings, background: defaultSettings.background })}
-                className="mt-2 text-xs text-emerald-600 hover:text-emerald-800"
+                onClick={() => setCustomizeOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
               >
-                Przywróć domyślne tło
+                <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
 
-            {/* Kolor cytatu */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Kolor tekstu cytatu
-              </label>
-              <input
-                type="color"
-                value={settings.quoteColor}
-                onChange={handleColorChange}
-                className="w-full h-10 p-1 rounded border border-gray-300"
-              />
-            </div>
+            <div className="space-y-4">
+              {/* Tło */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tło strony
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBackgroundChange}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                />
+                <button
+                  onClick={() => setSettings({ ...settings, background: defaultSettings.background })}
+                  className="mt-2 text-xs text-emerald-600 hover:text-emerald-800"
+                >
+                  Przywróć domyślne tło
+                </button>
+              </div>
 
-            {/* Czcionka */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Czcionka cytatu
-              </label>
-              <select
-                value={settings.quoteFont}
-                onChange={handleFontChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
+              {/* Kolor cytatu */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kolor tekstu cytatu
+                </label>
+                <input
+                  type="color"
+                  value={settings.quoteColor}
+                  onChange={handleColorChange}
+                  className="w-full h-10 p-1 rounded border border-gray-300"
+                />
+              </div>
+
+              {/* Czcionka */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Czcionka cytatu
+                </label>
+                <select
+                  value={settings.quoteFont}
+                  onChange={handleFontChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="'Times New Roman', serif">Times New Roman</option>
+                  <option value="'Courier New', monospace">Courier New</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                </select>
+              </div>
+
+              {/* Rozmiar */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rozmiar cytatu: {settings.quoteSize}rem
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  step="0.125"
+                  value={settings.quoteSize}
+                  onChange={handleSizeChange}
+                  className="w-full"
+                />
+              </div>
+
+              <button
+                onClick={resetSettings}
+                className="w-full mt-2 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-colors text-sm"
               >
-                <option value="Arial, sans-serif">Arial</option>
-                <option value="Georgia, serif">Georgia</option>
-                <option value="'Times New Roman', serif">Times New Roman</option>
-                <option value="'Courier New', monospace">Courier New</option>
-                <option value="Verdana, sans-serif">Verdana</option>
-                <option value="'Segoe UI', sans-serif">Segoe UI</option>
-              </select>
+                Przywróć domyślne
+              </button>
             </div>
-
-            {/* Rozmiar */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Rozmiar cytatu: {settings.quoteSize}rem
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="4"
-                step="0.125"
-                value={settings.quoteSize}
-                onChange={handleSizeChange}
-                className="w-full"
-              />
-            </div>
-
-            <button
-              onClick={resetSettings}
-              className="w-full mt-2 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-colors text-sm"
-            >
-              Przywróć domyślne
-            </button>
           </div>
         </div>
       )}
 
+      {/* Panel Kategorie - teraz jako modal centralny */}
       {categoriesOpen && (
-        <div
-          ref={categoriesRef}
-          className="absolute top-20 right-4 sm:right-8 w-72 sm:w-80 bg-white rounded-xl shadow-2xl z-30 p-5 border border-gray-200"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Wybierz kategorię</h3>
-            <button
-              onClick={() => setCategoriesOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Kategoria cytatu
-              </label>
-              <select
-                value={settings.category}
-                onChange={handleCategoryChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            ref={categoriesRef}
+            className="bg-white rounded-2xl w-full max-w-md relative shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Wybierz kategorię</h3>
+              <button
+                onClick={() => setCategoriesOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
               >
-                <option value="">Wszystko</option>
-                <option value="Zabawne">Zabawne</option>
-                <option value="Głębokie">Głębokie</option>
-                <option value="Motywujące">Motywujące</option>
-                <option value="Limbus Company">Limbus Company</option>
-              </select>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kategoria cytatu
+                </label>
+                <select
+                  value={settings.category}
+                  onChange={handleCategoryChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Wszystko</option>
+                  <option value="Zabawne">Zabawne</option>
+                  <option value="Głębokie">Głębokie</option>
+                  <option value="Motywujące">Motywujące</option>
+                  <option value="Zycie">Życie</option>
+                  <option value="Milosc">Miłość</option>
+                  <option value="Sukces">Sukces</option>
+                  <option value="Szczescie">Szczęście</option>
+                  <option value="Nauka">Nauka</option>
+                  <option value="Przyjazn">Przyjaźń</option>
+                  <option value="Limbus Company">Limbus Company</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -381,7 +392,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Pop-up */}
+      {/* Pop-up z cytatem */}
       <div
         className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-400 ${
           showPopup ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
