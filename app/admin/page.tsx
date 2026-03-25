@@ -23,7 +23,7 @@ import {
   faUpload,
   faSearch,
   faRobot,
-  faImage, // NEW: ikona dla obrazka (opcjonalnie)
+  faImage, 
 } from "@fortawesome/free-solid-svg-icons";
 import { json } from "stream/consumers";
 import { Quote } from "lucide-react";
@@ -448,7 +448,7 @@ export default function AdminPage() {
         </div>
 
         ) : (
-          // CHANGED: powiększony panel (max-w-5xl -> max-w-7xl)
+
           <Card className="w-full max-w-7xl bg-white/95 backdrop-blur-sm shadow-xl">
             <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-2">
               <CardTitle className="text-2xl sm:text-4xl text-emerald-700">Panel Administratora</CardTitle>
@@ -522,7 +522,7 @@ export default function AdminPage() {
                   {quotesError}
                 </div>
               ) : (
-                // NEW: zwiększona minimalna szerokość tabeli dla przewijania na telefonie
+
                 <div className="overflow-x-auto max-h-[60vh]">
                   <table className="w-full text-left border-collapse min-w-[1200px]">
                     <thead className="sticky top-0 bg-white border-b">
@@ -531,7 +531,6 @@ export default function AdminPage() {
                         <th className="pb-2 pr-4">Cytat</th>
                         <th className="pb-2 pr-4">Autor</th>
                         <th className="pb-2 pr-4">Kategoria</th>
-                        {/* NEW: kolumna Obraz */}
                         <th className="pb-2 pr-4">Obraz</th>
                         <th className="pb-2 pr-4">Data dodania</th>
                         <th className="pb-2">Akcje</th>
@@ -544,7 +543,6 @@ export default function AdminPage() {
                           <td className="py-3 pr-4 max-w-md break-words">{quote.cytat}</td>
                           <td className="py-3 pr-4">{quote.autor}</td>
                           <td className="py-3 pr-4">{quote.kategorie}</td>
-                          {/* NEW: komórka obrazka */}
                           <td className="py-3 pr-4 text-sm text-gray-600 max-w-[150px] truncate">
                             {quote.image_url ? (
                               <a href={quote.image_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
@@ -577,7 +575,6 @@ export default function AdminPage() {
                       ))}
                       {quotes.length === 0 && !quotesLoading && (
                         <tr>
-                          {/* CHANGED: zwiększono colSpan z 5 na 7 */}
                           <td colSpan={7} className="py-8 text-center text-gray-500">
                             Brak cytatów. Kliknij "Dodaj", aby dodać pierwszy.
                           </td>
@@ -660,7 +657,7 @@ export default function AdminPage() {
                     <option value="Limbus Company">Limbus Company</option>
                   </select>
                 </div>
-                {/* NEW: pole URL obrazka */}
+                {/* pole URL obrazka */}
                 <div className="space-y-2">
                   <Label htmlFor="modal-image">
                     Tło cytatu (opcjonalne)

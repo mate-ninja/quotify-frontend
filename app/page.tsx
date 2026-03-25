@@ -218,7 +218,7 @@ export default function Home() {
       className="w-screen h-screen flex flex-col items-center justify-center bg-cover bg-center relative transition-all duration-300"
       style={{ backgroundImage: settings.background }}
     >
-      {/* Panel Customize - teraz jako modal centralny */}
+      {/* Panel Customize */}
       {customizeOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
@@ -314,7 +314,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Panel Kategorie - teraz jako modal centralny */}
+      {/* Panel Kategorie */}
       {categoriesOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
@@ -472,6 +472,7 @@ export default function Home() {
               >
                 Kategorie
               </button>
+              <button onClick={() => {setFavoritesOpen(true); setMenuOpen(false);}} className="w-full text-left block px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-0">Ulubione</button>
             </div>
           )}
         </div>
@@ -539,16 +540,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <button
-        onClick={() => setFavoritesOpen(true)}
-        className="fixed bottom-6 right-6 bg-yellow-400 hover:bg-yellow-500 text-white w-14 h-14 rounded-full text-2xl shadow-xl flex items-center justify-center"
-      >
-        <FontAwesomeIcon 
-          icon={faStar}
-        />
-      </button>
-
+      
       {/* Loader */}
       {loading && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center backdrop-blur-sm z-[9999]">
