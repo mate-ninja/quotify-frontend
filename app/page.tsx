@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faEllipsisV, faStar } from "@fortawesome/free-solid-svg-icons";
 import { faQuoteLeft, faQuoteRight } from '@fortawesome/free-solid-svg-icons';
 import "./globals.css";
 
@@ -30,10 +30,14 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [customizeOpen, setCustomizeOpen] = useState<boolean>(false);
   const [categoriesOpen, setCategoriesOpen] = useState<boolean>(false);
+  const [favorites, setFavorites] = useState<Quote[]>([]);
+  const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
+  const quoteRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const customizeRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
   const errorPopupRef = useRef<HTMLDivElement>(null);
+  const favPopupRef = useRef<HTMLDivElement>(null);
 
   // Domyślne ustawienia
   const defaultSettings: CustomizeSettings = {
@@ -53,7 +57,15 @@ export default function Home() {
       try {
         setSettings(JSON.parse(saved));
       } catch (e) {
-        console.error("Błąd odczytu ustawień", e);
+        console.error("Błąd ustawień", e);
+      }
+    }
+    const savedFav = localStorage.getItem("favorites");
+    if (savedFav) {
+      try {
+        setFavorites(JSON.parse(savedFav));
+      } catch (e) {
+        console.error("Błąd ulubionych", e);
       }
     }
   }, []);
@@ -61,6 +73,10 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("customizeSettings", JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
 
   async function getJSONData(): Promise<[string, string, string?]> {
     const response = await fetch(
@@ -105,6 +121,9 @@ export default function Home() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (quoteRef.current && !quoteRef.current.contains(event.target as Node)) {
+        closePopup();
+      }
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
       }
@@ -116,6 +135,9 @@ export default function Home() {
       }
       if (errorPopupRef.current && !errorPopupRef.current.contains(event.target as Node)) {
         closeErrorPopup();
+      }
+      if (favPopupRef.current && !favPopupRef.current.contains(event.target as Node)) {
+        setFavoritesOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -159,6 +181,36 @@ export default function Home() {
   const getOutlineColor = (color: string) => {
     const darkColors = ['#111827', '#000000', '#000'];
     return darkColors.includes(color.toLowerCase()) ? '#ffffff' : '#000000';
+  };
+
+  const addToFavorites = () => {
+    const exists = favorites.some(
+      (fav) => fav.content === quote.content && fav.author === quote.author
+    );
+    if (!exists) {
+      setFavorites([...favorites, quote]);
+    }
+  };
+
+  const toggleFavorite = () => {
+    if (isFavorite) {
+      removeFromFavorites(quote);
+    } else {
+      addToFavorites();
+    }
+  };
+
+  const isFavorite = favorites.some(
+    (fav) => fav.content === quote.content && fav.author === quote.author
+  );
+
+  const removeFromFavorites = (favToRemove: Quote) => {
+    setFavorites(
+      favorites.filter(
+        (fav) =>
+          !(fav.content === favToRemove.content && fav.author === favToRemove.author)
+      )
+    );
   };
 
   return (
@@ -307,6 +359,39 @@ export default function Home() {
         </div>
       )}
 
+      {favoritesOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6 relative" ref={favPopupRef}>
+            <button
+              onClick={() => setFavoritesOpen(false)}
+              className="absolute top-3 right-3 text-xl"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            
+            <h2 className="text-xl font-bold mb-4">Ulubione cytaty</h2>
+            {favorites.length === 0 ? (
+              <p className="text-gray-500">Brak ulubionych cytatów</p>
+            ) : (
+              <div className="space-y-4">
+                {favorites.map((fav, index) => (
+                  <div key={index} className="border-b pb-2">
+                    <p className="font-semibold">{fav.content}</p>
+                    <p className="text-sm text-gray-500 italic">{fav.author}</p>
+                    <button
+                      onClick={() => removeFromFavorites(fav)}
+                      className="text-red-500 text-sm"
+                    >
+                      Usuń
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {errorPopup && (
         <div
           ref={errorPopupRef}
@@ -406,12 +491,22 @@ export default function Home() {
             backgroundColor: !quote.image_url ? '#ffffff' : undefined,
             backgroundImage: quote.image_url ? `url('${quote.image_url}')` : undefined,
           }}
+          ref={quoteRef}
         >
           <div
             onClick={closePopup}
             className="absolute top-3 right-3 text-2xl font-bold text-black cursor-pointer hover:text-gray-600 transition-colors z-10"
           >
             <FontAwesomeIcon icon={faTimes} />
+          </div>
+          <div
+            onClick={toggleFavorite}
+            className="absolute top-3 left-3 text-2xl cursor-pointer z-10"
+          >
+            <FontAwesomeIcon 
+              icon={faStar}
+              className={isFavorite ? "text-yellow-400" : "text-gray-400"}  
+            />
           </div>
 
           <div className="h-full flex flex-col items-start justify-center px-2 sm:px-4 overflow-y-auto">
@@ -444,6 +539,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <button
+        onClick={() => setFavoritesOpen(true)}
+        className="fixed bottom-6 right-6 bg-yellow-400 hover:bg-yellow-500 text-white w-14 h-14 rounded-full text-2xl shadow-xl flex items-center justify-center"
+      >
+        <FontAwesomeIcon 
+          icon={faStar}
+        />
+      </button>
 
       {/* Loader */}
       {loading && (
